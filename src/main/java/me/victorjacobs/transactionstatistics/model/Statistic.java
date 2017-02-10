@@ -1,7 +1,5 @@
 package me.victorjacobs.transactionstatistics.model;
 
-import java.util.List;
-
 /**
  * Created by Victor on 10/02/2017.
  */
@@ -21,7 +19,7 @@ public class Statistic {
     }
 
     public Statistic() {
-        this(0, 0, 0, 0, 0);
+        this(0, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, 0);
     }
 
     public double getSum() {
@@ -62,6 +60,9 @@ public class Statistic {
         double totalSum = 0;
 
         for (Statistic statistic : statistics) {
+            if (statistic == null) {
+                continue;
+            }
             totalCount += statistic.getCount();
             totalAvg = totalAvg + ((statistic.getAvg() - totalAvg) / totalCount);
             totalMax = Math.max(totalMax, statistic.getMax());

@@ -27,6 +27,10 @@ public class Transaction {
         return timestamp;
     }
 
+    public double getTimestampFlooredToSecond() {
+        return Math.floor(timestamp / 1000) * 1000;
+    }
+
     @Override
     public String toString() {
         return "Transaction [" + timestamp + " " + amount + "]";
