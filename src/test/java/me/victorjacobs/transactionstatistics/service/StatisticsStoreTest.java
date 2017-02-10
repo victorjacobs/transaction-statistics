@@ -28,6 +28,7 @@ public class StatisticsStoreTest {
     @Test
     public void addTransaction_emptyStore() {
         when(clock.millis()).thenReturn(Instant.now().toEpochMilli());
+
         statisticsStore.add(createTransaction(10.0, 10));
         statisticsStore.add(createTransaction(4.0, 15));
 
@@ -37,24 +38,76 @@ public class StatisticsStoreTest {
     @Test
     public void addTransaction_toSameBucket() {
         when(clock.millis()).thenReturn(Instant.now().toEpochMilli());
+
         statisticsStore.add(createTransaction(10.0, 10));
         statisticsStore.add(createTransaction(4.0, 10));
 
         assertStatisticStore(14.0, 7.0, 10.0, 4.0, 2);
     }
 
-//    public void addTransaction_
+    @Test
+    public void addTransaction_wrapsAround() {
+        long currentMillis = Instant.now().toEpochMilli();
+
+        when(clock.millis()).thenReturn(currentMillis);
+        statisticsStore.add(createTransaction(10.0, 10));
+
+        when(clock.millis()).thenReturn(currentMillis + 60000);
+        statisticsStore.add(createTransaction(4.0, 10));
+
+        assertStatisticStore(4.0, 4.0, 4.0, 4.0, 1);
+    }
+
+    @Test
+    public void addTransaction_outOfOrder() {
+        when(clock.millis()).thenReturn(Instant.now().toEpochMilli());
+
+        statisticsStore.add(createTransaction(10.0, 5));
+        statisticsStore.add(createTransaction(4.0, 10));
+
+        assertStatisticStore(14.0, 7.0, 10.0, 4.0, 2);
+    }
+
+    @Test
+    public void addTransaction_transactionBeforeWindow() {
+        when(clock.millis()).thenReturn(Instant.now().toEpochMilli());
+
+        statisticsStore.add(createTransaction(10.0, 5));
+        statisticsStore.add(createTransaction(4.0, 100));
+
+        assertStatisticStore(10.0, 10.0, 10.0, 10.0, 1);
+    }
+
+    @Test
+    public void addTransaction_transactionInFuture() {
+        when(clock.millis()).thenReturn(Instant.now().toEpochMilli());
+
+        statisticsStore.add(createTransaction(10.0, 5));
+        statisticsStore.add(createTransaction(4.0, -100));
+
+        assertStatisticStore(10.0, 10.0, 10.0, 10.0, 1);
+    }
+
+    @Test
+    public void addTransaction_negativeAmount() {
+        when(clock.millis()).thenReturn(Instant.now().toEpochMilli());
+
+        statisticsStore.add(createTransaction(10.0, 5));
+        statisticsStore.add(createTransaction(-10.0, 10));
+
+        assertStatisticStore(0.0, 0.0, 10.0, -10.0, 2);
+    }
 
     private void assertStatisticStore(double sum, double avg, double max, double min, long count) {
         assertStatistic(sum, avg, max, min, count, statisticsStore.getStatistic());
     }
 
     private void assertStatistic(double sum, double avg, double max, double min, long count, Statistic stat) {
-        assertEquals(count, stat.getCount());
-        assertEquals(avg, stat.getAvg(), 0.001);
         assertEquals(sum, stat.getSum(), 0.001);
+        assertEquals(avg, stat.getAvg(), 0.001);
         assertEquals(max, stat.getMax(), 0.001);
         assertEquals(min, stat.getMin(), 0.001);
+        assertEquals(count, stat.getCount());
     }
 
     // TODO maybe should move this somewhere dedicated, but where?

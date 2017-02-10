@@ -54,17 +54,20 @@ public class Statistic {
 
     public static Statistic combine(Statistic[] statistics) {
         long totalCount = 0;
-        double totalAvg = 0;
+        int numberOfStatistics = 0;
         double totalMax = Double.NEGATIVE_INFINITY;
         double totalMin = Double.POSITIVE_INFINITY;
         double totalSum = 0;
+        double totalAvg = 0;
 
         for (Statistic statistic : statistics) {
             if (statistic == null) {
                 continue;
             }
+
+            numberOfStatistics++;
+            totalAvg = totalAvg + ((statistic.getAvg() - totalAvg) / numberOfStatistics);
             totalCount += statistic.getCount();
-            totalAvg = totalAvg + ((statistic.getAvg() - totalAvg) / totalCount);
             totalMax = Math.max(totalMax, statistic.getMax());
             totalMin = Math.min(totalMin, statistic.getMin());
             totalSum += statistic.getSum();

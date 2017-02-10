@@ -26,6 +26,10 @@ public class StatisticsStore {
     }
 
     public synchronized void add(Transaction transaction) {
+        if (shouldDiscardTransaction(transaction)) {
+            return;
+        }
+
         if (shouldResetBucketFor(transaction)) {
             setBucket(transaction, new Statistic());
         }
@@ -39,7 +43,8 @@ public class StatisticsStore {
     }
 
     private boolean shouldDiscardTransaction(Transaction transaction) {
-        return clock.millis() - transaction.getTimestamp() > 60000;
+        return clock.millis() - transaction.getTimestamp() > 60000 ||
+                clock.millis() < transaction.getTimestamp();
     }
 
     private boolean shouldResetBucketFor(Transaction transaction) {
