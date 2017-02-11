@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import static org.springframework.web.bind.annotation.RequestMethod.POST;
 
 /**
+ * Controller for the /transactions endpoint.
  * Created by Victor on 10/02/2017.
  */
 @RestController

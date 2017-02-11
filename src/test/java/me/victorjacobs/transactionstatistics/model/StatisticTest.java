@@ -1,5 +1,6 @@
 package me.victorjacobs.transactionstatistics.model;
 
+import me.victorjacobs.transactionstatistics.BaseTest;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -9,7 +10,7 @@ import static org.junit.Assert.assertEquals;
  * Test the Statistic model
  * Created by Victor on 10/02/2017.
  */
-public class StatisticTest {
+public class StatisticTest extends BaseTest {
     private Statistic s1;
     private Statistic s2;
     private Statistic s3;
@@ -22,13 +23,16 @@ public class StatisticTest {
     }
 
     @Test
+    public void add() {
+        Statistic combined = s1.add(new Transaction(4.0, 0));
+
+        assertStatistic(14.0, 7.0, 10.0, 4.0, 2, combined);
+    }
+
+    @Test
     public void combine() {
         Statistic combined = Statistic.combine(new Statistic[]{s1, s2, s3});
 
-        assertEquals(28.0, combined.getSum(), 0.001);
-        assertEquals(4.666, combined.getAvg(), 0.001);
-        assertEquals(10.0, combined.getMax(), 0.001);
-        assertEquals(4.0, combined.getMin(), 0.001);
-        assertEquals(6, combined.getCount());
+        assertStatistic(28.0, 4.666, 10.0, 4.0, 6, combined);
     }
 }

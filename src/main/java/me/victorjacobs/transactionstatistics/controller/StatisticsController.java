@@ -8,11 +8,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
+ * Controller for the /statistics endpoint.
  * Created by Victor on 10/02/2017.
  */
 @RestController
 public class StatisticsController {
-    private StatisticsStore statisticsStore;
+    private final StatisticsStore statisticsStore;
 
     @Autowired
     public StatisticsController(StatisticsStore statisticsStore) {

@@ -1,6 +1,8 @@
 package me.victorjacobs.transactionstatistics.model;
 
 /**
+ * Represents statistics for a time series of doubles. The values themselves are not stored, only their moving statistics.
+ * Objects are immutable, all mutating operations return new instances of the class.
  * Created by Victor on 10/02/2017.
  */
 public class Statistic {
@@ -42,6 +44,11 @@ public class Statistic {
         return count;
     }
 
+    /**
+     * Add a transaction to statistics and returns a new instance of this class.
+     * @param transaction   Transaction to add to the statistics
+     * @return New instance of this class, combining the original statistics and the new transaction
+     */
     public Statistic add(Transaction transaction) {
         long newCount = count + 1;
         double newAvg = avg + ((transaction.getAmount() - avg) / newCount);
@@ -52,9 +59,13 @@ public class Statistic {
         return new Statistic(newSum, newAvg, newMax, newMin, newCount);
     }
 
+    /**
+     * Reduces a list of statistics to one statistics object.
+     * @param statistics    List of statistics to reduce
+     * @return New class instance containing the reduction of given list
+     */
     public static Statistic combine(Statistic[] statistics) {
         long totalCount = 0;
-        int numberOfStatistics = 0;
         double totalMax = Double.NEGATIVE_INFINITY;
         double totalMin = Double.POSITIVE_INFINITY;
         double totalSum = 0;
@@ -65,9 +76,8 @@ public class Statistic {
                 continue;
             }
 
-            numberOfStatistics++;
-            totalAvg = totalAvg + ((statistic.getAvg() - totalAvg) / numberOfStatistics);
             totalCount += statistic.getCount();
+            totalAvg = totalAvg + ((statistic.getAvg() - totalAvg) / totalCount);
             totalMax = Math.max(totalMax, statistic.getMax());
             totalMin = Math.min(totalMin, statistic.getMin());
             totalSum += statistic.getSum();
