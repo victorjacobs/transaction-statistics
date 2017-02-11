@@ -17,10 +17,10 @@ import java.util.List;
  *
  * To link the buckets with the actual time window they are representing, a second list of "bucketTimestamps" is kept.
  * Here every entry is the lower bound timestamp of the window the bucket represents. This is to make sure that when the
- * buckets wrap around, that we can reset the bucket.
+ * buckets wrap around, that it can be detected and properly reset.
  *
- * When the statistics for the entire window are requested, all statistics objects in all buckets are combined with
- * each other. Since there are only 60 buckets, this ensures constant memory complexity for reading the statistics.
+ * When the statistics for the entire window are requested, all statistics objects in the buckets are combined with
+ * each other. Since there are only 60 buckets, this ensures constant time complexity for reading the statistics.
  * However, here we need to make sure that the data in all the buckets is really from the last 60 seconds. In the case
  * where a bucket isn't written to for a long time, it will contain statistics that have nothing to do with the window,
  * but will be included in the total statistics if not properly managed. This is done by only using the buckets used
@@ -42,7 +42,7 @@ public class StatisticsStore {
     private final Clock clock;
 
     public StatisticsStore() {
-        this.clock = Clock.systemDefaultZone();
+        this.clock = Clock.systemUTC();
     }
 
     StatisticsStore(Clock clock) {
@@ -80,7 +80,7 @@ public class StatisticsStore {
      * @return Buckets for the last 60 seconds
      */
     private List<Statistic> getRelevantBuckets() {
-        // Ensure that the window start is consistent over the filtering of the buckets fixing it in a variable
+        // Ensure that the window start is consistent over the filtering of the buckets by fixing it in a variable
         long windowStart = clock.millis() - WINDOW_SIZE_MILLIS;
         LinkedList<Statistic> relevantBuckets = new LinkedList<>();
 
@@ -143,7 +143,7 @@ public class StatisticsStore {
      * @param transaction   Transaction for which to find timestamp
      * @return Timestamp identifying the bucket
      */
-    private double getBucketTimestamp(Transaction transaction) {
+    private long getBucketTimestamp(Transaction transaction) {
         return bucketTimestamps[getBucketIndex(transaction)];
     }
 

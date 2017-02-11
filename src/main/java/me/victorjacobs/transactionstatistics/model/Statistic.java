@@ -47,7 +47,7 @@ public class Statistic {
     }
 
     /**
-     * Add a transaction to statistics and returns a new instance of this class.
+     * Add a transaction to statistics, doesn't mutate this object.
      * @param transaction   Transaction to add to the statistics
      * @return New instance of this class, combining the original statistics and the new transaction
      */
@@ -83,7 +83,11 @@ public class Statistic {
             totalSum += statistic.getSum();
         }
 
-        return new Statistic(totalSum, totalSum / totalCount, totalMax, totalMin, totalCount);
+        if (totalCount != 0) {
+            return new Statistic(totalSum, totalSum / totalCount, totalMax, totalMin, totalCount);
+        } else {
+            return new Statistic();
+        }
     }
 
     @Override
