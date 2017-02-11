@@ -11,6 +11,6 @@ public class TransactionTest {
     @Test
     public void getTimestampFloored() {
         Transaction transaction = new Transaction(10.0, 1234);
-        assertEquals(1000, transaction.getTimestampFlooredToSecond(), 0.001);
+        assertEquals(1000, transaction.getTimestampFlooredToSecond());
     }
 }

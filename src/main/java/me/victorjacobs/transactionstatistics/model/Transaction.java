@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
- * Class representing a transaction
+ * Class representing a transaction.
  * Created by Victor on 10/02/2017.
  */
 public class Transaction {
@@ -38,8 +38,8 @@ public class Transaction {
      * Floor the timestamp to the nearest second.
      * @return Timestamp floored to the nearest second, in milliseconds
      */
-    public double getTimestampFlooredToSecond() {
-        return Math.floor(timestamp / 1000) * 1000;
+    public long getTimestampFlooredToSecond() {
+        return (long) Math.floor(timestamp / 1000) * 1000;
     }
 
     @Override

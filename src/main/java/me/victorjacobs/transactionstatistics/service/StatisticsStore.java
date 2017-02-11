@@ -6,6 +6,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Service;
 
 import java.time.Clock;
+import java.util.LinkedList;
+import java.util.List;
 
 /**
  * Represents the store of the time-series transaction statistics. Storage happens by dividing incoming transactions
@@ -13,17 +15,30 @@ import java.time.Clock;
  * statistics for all transactions for which the timestamp (in seconds) % 60 == N. When a values comes in, it is combined
  * with the statistics object in the bucket and the actual value discarded. This ensures constant memory complexity.
  *
+ * To link the buckets with the actual time window they are representing, a second list of "bucketTimestamps" is kept.
+ * Here every entry is the lower bound timestamp of the window the bucket represents. This is to make sure that when the
+ * buckets wrap around, that we can reset the bucket.
+ *
  * When the statistics for the entire window are requested, all statistics objects in all buckets are combined with
  * each other. Since there are only 60 buckets, this ensures constant memory complexity for reading the statistics.
+ * However, here we need to make sure that the data in all the buckets is really from the last 60 seconds. In the case
+ * where a bucket isn't written to for a long time, it will contain statistics that have nothing to do with the window,
+ * but will be included in the total statistics if not properly managed. This is done by only using the buckets used
+ * for data in the last 60 seconds to calculate the overall statistics. This is favorable over pruning the buckets on
+ * read because would introduce unneeded complexity in synchronising writes to the backing data store.
  *
- * Clock can be injected, which allows for consistent unit tests.
+ * Clock can be injected, easy unit testing.
  * Created by Victor on 10/02/2017.
  */
 @Service
 @Scope("singleton")
 public class StatisticsStore {
-    private Statistic[] buckets = new Statistic[60];
-    private double[] bucketTimestamps = new double[60];
+    private static final int WINDOW_SIZE_MILLIS = 60000;
+
+    private static final int WINDOW_SIZE_SECONDS = (int) Math.floor(WINDOW_SIZE_MILLIS / 1000);
+
+    private Statistic[] buckets = new Statistic[WINDOW_SIZE_SECONDS];
+    private long[] bucketTimestamps = new long[WINDOW_SIZE_SECONDS];
     private final Clock clock;
 
     public StatisticsStore() {
@@ -35,7 +50,7 @@ public class StatisticsStore {
     }
 
     /**
-     * Add a transaction to the store.
+     * Add a transaction to the store. This entire method is synchronised to ensure no dirty reads can happen.
      * @param transaction   Transaction to be added
      */
     public synchronized void add(Transaction transaction) {
@@ -56,7 +71,30 @@ public class StatisticsStore {
      * @return Statistics over all transaction received in the last 60 seconds
      */
     public Statistic getStatistic() {
-        return Statistic.combine(buckets);
+        return Statistic.combine(getRelevantBuckets());
+    }
+
+    /**
+     * Filters the buckets to the ones that are relevant in statistics calculation. I.e. only buckets that are marked
+     * as having a timestamp within the last 60 seconds.
+     * @return Buckets for the last 60 seconds
+     */
+    private List<Statistic> getRelevantBuckets() {
+        // Ensure that the window start is consistent over the filtering of the buckets fixing it in a variable
+        long windowStart = clock.millis() - WINDOW_SIZE_MILLIS;
+        LinkedList<Statistic> relevantBuckets = new LinkedList<>();
+
+        for (int i = 0; i < buckets.length; i++) {
+            if (buckets[i] == null) {
+                continue;
+            }
+
+            if (bucketTimestamps[i] >= windowStart) {
+                relevantBuckets.push(buckets[i]);
+            }
+        }
+
+        return relevantBuckets;
     }
 
     /**
@@ -66,7 +104,7 @@ public class StatisticsStore {
      * @return Whether or not a transaction should be discarded
      */
     private boolean shouldDiscardTransaction(Transaction transaction) {
-        return clock.millis() - transaction.getTimestamp() > 60000 ||
+        return clock.millis() - transaction.getTimestamp() > WINDOW_SIZE_MILLIS ||
                 clock.millis() < transaction.getTimestamp();
     }
 
@@ -124,6 +162,6 @@ public class StatisticsStore {
      * @return Index of bucket in backing arrays
      */
     private int getBucketIndex(Transaction transaction) {
-        return (int) Math.floor(transaction.getTimestamp() / 1000) % 60;
+        return (int) Math.floor(transaction.getTimestamp() / 1000) % WINDOW_SIZE_SECONDS;
     }
 }

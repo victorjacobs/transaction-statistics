@@ -1,5 +1,7 @@
 package me.victorjacobs.transactionstatistics.model;
 
+import java.util.List;
+
 /**
  * Represents statistics for a time series of doubles. The values themselves are not stored, only their moving statistics.
  * Objects are immutable, all mutating operations return new instances of the class.
@@ -64,12 +66,11 @@ public class Statistic {
      * @param statistics    List of statistics to reduce
      * @return New class instance containing the reduction of given list
      */
-    public static Statistic combine(Statistic[] statistics) {
+    public static Statistic combine(List<Statistic> statistics) {
         long totalCount = 0;
         double totalMax = Double.NEGATIVE_INFINITY;
         double totalMin = Double.POSITIVE_INFINITY;
         double totalSum = 0;
-        double totalAvg = 0;
 
         for (Statistic statistic : statistics) {
             if (statistic == null) {
@@ -77,13 +78,12 @@ public class Statistic {
             }
 
             totalCount += statistic.getCount();
-            totalAvg = totalAvg + ((statistic.getAvg() - totalAvg) / totalCount);
             totalMax = Math.max(totalMax, statistic.getMax());
             totalMin = Math.min(totalMin, statistic.getMin());
             totalSum += statistic.getSum();
         }
 
-        return new Statistic(totalSum, totalAvg, totalMax, totalMin, totalCount);
+        return new Statistic(totalSum, totalSum / totalCount, totalMax, totalMin, totalCount);
     }
 
     @Override

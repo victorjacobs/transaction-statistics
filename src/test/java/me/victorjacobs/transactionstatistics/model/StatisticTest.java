@@ -4,10 +4,11 @@ import me.victorjacobs.transactionstatistics.BaseTest;
 import org.junit.Before;
 import org.junit.Test;
 
-import static org.junit.Assert.assertEquals;
+import java.util.Arrays;
+import java.util.LinkedList;
 
 /**
- * Test the Statistic model
+ * Test the Statistic model.
  * Created by Victor on 10/02/2017.
  */
 public class StatisticTest extends BaseTest {
@@ -31,8 +32,8 @@ public class StatisticTest extends BaseTest {
 
     @Test
     public void combine() {
-        Statistic combined = Statistic.combine(new Statistic[]{s1, s2, s3});
+        Statistic combined = Statistic.combine(new LinkedList<>(Arrays.asList(s1, s2, s3)));
 
-        assertStatistic(28.0, 4.666, 10.0, 4.0, 6, combined);
+        assertStatistic(28.0, 4.666, 10.0, 1.0, 6, combined);
     }
 }
