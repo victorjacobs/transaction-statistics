@@ -2,11 +2,13 @@ package me.victorjacobs.transactionstatistics.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
 
 /**
  * Class representing a transaction.
  * Created by Victor on 10/02/2017.
  */
+@Data
 public class Transaction {
     private final double amount;
     private final long timestamp;
@@ -18,20 +20,6 @@ public class Transaction {
     ) {
         this.amount = amount;
         this.timestamp = timestamp;
-    }
-
-    /**
-     * @return Amount of the transaction
-     */
-    public double getAmount() {
-        return amount;
-    }
-
-    /**
-     * @return Timestamp of transaction in milliseconds
-     */
-    public long getTimestamp() {
-        return timestamp;
     }
 
     /**

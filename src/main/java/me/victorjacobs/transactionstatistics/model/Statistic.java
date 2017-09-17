@@ -1,5 +1,8 @@
 package me.victorjacobs.transactionstatistics.model;
 
+import lombok.Data;
+import lombok.RequiredArgsConstructor;
+
 import java.util.List;
 
 /**
@@ -7,6 +10,8 @@ import java.util.List;
  * Objects are immutable, all mutating operations return new instances of the class.
  * Created by Victor on 10/02/2017.
  */
+@Data
+@RequiredArgsConstructor
 public class Statistic {
     private final double sum;
     private final double avg;
@@ -14,36 +19,8 @@ public class Statistic {
     private final double min;
     private final long count;
 
-    public Statistic(double sum, double avg, double max, double min, long count) {
-        this.sum = sum;
-        this.avg = avg;
-        this.max = max;
-        this.min = min;
-        this.count = count;
-    }
-
     public Statistic() {
         this(0, 0, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY, 0);
-    }
-
-    public double getSum() {
-        return sum;
-    }
-
-    public double getAvg() {
-        return avg;
-    }
-
-    public double getMax() {
-        return max;
-    }
-
-    public double getMin() {
-        return min;
-    }
-
-    public long getCount() {
-        return count;
     }
 
     /**
