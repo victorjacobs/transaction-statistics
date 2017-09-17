@@ -39,7 +39,7 @@ public class Transaction {
      * @return Timestamp floored to the nearest second, in milliseconds
      */
     public long getTimestampFlooredToSecond() {
-        return (long) Math.floor(timestamp / 1000) * 1000;
+        return (timestamp / 1000) * 1000;
     }
 
     @Override

@@ -35,7 +35,7 @@ import java.util.List;
 public class StatisticsStore {
     private static final int WINDOW_SIZE_MILLIS = 60000;
 
-    private static final int WINDOW_SIZE_SECONDS = (int) Math.floor(WINDOW_SIZE_MILLIS / 1000);
+    private static final int WINDOW_SIZE_SECONDS = WINDOW_SIZE_MILLIS / 1000;
 
     private Statistic[] buckets = new Statistic[WINDOW_SIZE_SECONDS];
     private long[] bucketTimestamps = new long[WINDOW_SIZE_SECONDS];
@@ -162,6 +162,6 @@ public class StatisticsStore {
      * @return Index of bucket in backing arrays
      */
     private int getBucketIndex(Transaction transaction) {
-        return (int) Math.floor(transaction.getTimestamp() / 1000) % WINDOW_SIZE_SECONDS;
+        return (int) (transaction.getTimestamp() / 1000) % WINDOW_SIZE_SECONDS;
     }
 }
